@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Мовний Друг</title>
+    <style>
+        body {
+            max-width: 720px;
+            margin: 24px auto;
+            font: 16px/1.5 system-ui
+        }
+
+        #chat {
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 12px;
+            min-height: 300px
+        }
+
+        .msg {
+            padding: 8px 12px;
+            border-radius: 10px;
+            margin: 8px 0;
+            white-space: pre-wrap
+        }
+
+        .you {
+            background: #f2f2f2
+        }
+
+        .bot {
+            background: #e8f6ff
+        }
+
+        form {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px
+        }
+
+        input {
+            flex: 1;
+            padding: 10px
+        }
+
+        button {
+            padding: 10px 14px
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Мовний Друг 🇩🇪 (MVP)</h1>
+
+    <div id="chat"></div>
+
+    <form id="f">
+        <input id="t" placeholder="Напиши німецькою..." autocomplete="off" />
+        <button>Надіслати</button>
+    </form>
+
+    <script>
+        const API = "http://localhost:3000/chat";
+        const $chat = document.getElementById('chat');
+        const $f = document.getElementById('f');
+        const $t = document.getElementById('t');
+
+        function push(text, who) {
+            const div = document.createElement('div');
+            div.className = `msg ${who}`;
+            div.textContent = text;
+            $chat.appendChild(div);
+            div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+
+        $f.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = $t.value.trim();
+            if (!text) return;
+            push(text, 'you');
+            $t.value = '';
+            try {
+                const r = await fetch(API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+                const data = await r.json();
+                push(data.reply || '...', 'bot');
+            } catch {
+                push('Помилка зʼєднання 😅', 'bot');
+            }
+        });
+    </script>
+</body>
+
+</html>
